@@ -1,3 +1,4 @@
+<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>bow-gid — a shared AI coding agent with a human approval gate</title>
@@ -7,8 +8,8 @@
 <link rel="icon" href="favicon-16.png" sizes="16x16" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
-<meta name="description" content="Self-hosted AI coding agent your whole team can share. It plans first, you approve, then it executes — every file edit, shell command and migration stops at a gate until a human says yes. Six role-based modes for QC, BA, reviewers, DevOps and contractors. Open source, MIT.">
-<meta name="keywords" content="ai coding agent, self-hosted ai agent, human in the loop, claude agent sdk, claude code alternative, approval workflow, ai code review, jira ai agent, mcp, open source">
+<meta name="description" content="Self-hosted AI coding agent your whole team can share. It plans first, you approve, then it executes — every file edit, shell command and migration stops at a gate until a human says yes. Seats for QC, BA, reviewers, DevOps, contractors and guests; it works Jira tickets through to a merge request, tests on a simulator or in a browser, and never merges on its own.">
+<meta name="keywords" content="ai coding agent, self-hosted ai agent, human in the loop, claude agent sdk, approval workflow, ai code review, jira ai agent, mcp, team ai agent">
 <meta name="author" content="Bow-T">
 <link rel="canonical" href="https://bow-t.github.io/bow-gid-site/">
 
@@ -35,22 +36,19 @@
   "@type": "SoftwareApplication",
   "name": "bow-gid",
   "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "macOS, Linux, Windows",
-  "description": "Self-hosted AI coding agent with a human approval gate. Turn a Jira ticket, spec doc, or plain task into a reviewed plan, then let it execute — every write approved by a human. Six role-based modes let QC, BA, reviewers, DevOps and contractors share one agent over LAN.",
+  "operatingSystem": "macOS",
+  "description": "Self-hosted AI coding agent with a human approval gate. Turn a Jira ticket, spec doc, or plain task into a reviewed plan, then let it execute — every write approved by a human. Role-based seats let QC, BA, reviewers, DevOps, contractors and guests share one agent over LAN.",
   "url": "https://bow-t.github.io/bow-gid-site/",
-  "codeRepository": "https://github.com/Bow-T/bow-gid",
   "programmingLanguage": "TypeScript",
-  "license": "https://opensource.org/licenses/MIT",
-  "isAccessibleForFree": true,
-  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
   "author": { "@type": "Organization", "name": "Bow-T" }
 }
 </script>
 
 <style>
   /* ════════════════════════════════════════════════════════════════════
-     Tokens — lifted from the app's own [data-theme='brutal'] block so the
-     landing page and the product speak one language.
+     Tokens — lifted from the app's own [data-theme='brutal'] block
+     (web/styles/tokens.css) so the landing page and the product speak one
+     language. Accent is the app's lime (#cdff71) since 2026-10-30.
      ════════════════════════════════════════════════════════════════════ */
   :root {
     color-scheme: light;
@@ -61,10 +59,11 @@
     --ink-2:    #1a1a1a;
     --muted:    #4a4a4a;
 
-    --yellow:   #ffcf24;
-    --yellow-2: #ffda52;
+    --lime:     #cdff71;
+    --lime-2:   #dcff97;
     --coral:    #ff5a5a;
     --lav:      #b8a4ff;
+    --wait:     #ffb340;
 
     --bd:       3px solid #0a0a0a;
     --bd-fat:   5px solid #0a0a0a;
@@ -84,13 +83,13 @@
     --s-4:  clamp(3rem, 2rem + 4.6vw, 6.5rem);
   }
 
-  /* Dark: brutalism inverts to black ground; the yellow gets LOUDER, never softer. */
+  /* Dark: brutalism inverts to black ground; the lime gets LOUDER, never softer. */
   @media (prefers-color-scheme: dark) {
     :root {
       color-scheme: dark;
       --cream: #0a0a0a; --card: #161616; --inset: #1f1f1f;
       --ink: #fbf6e9; --ink-2: #e8e2d4; --muted: #9a9384;
-      --yellow: #ffd633; --yellow-2: #ffe066;
+      --lime: #d4ff80; --lime-2: #e2ffa6;
       --coral: #ff6b6b; --lav: #c4b3ff;
       --bd: 3px solid #fbf6e9;
       --bd-fat: 5px solid #fbf6e9;
@@ -104,7 +103,7 @@
     color-scheme: dark;
     --cream: #0a0a0a; --card: #161616; --inset: #1f1f1f;
     --ink: #fbf6e9; --ink-2: #e8e2d4; --muted: #9a9384;
-    --yellow: #ffd633; --yellow-2: #ffe066;
+    --lime: #d4ff80; --lime-2: #e2ffa6;
     --coral: #ff6b6b; --lav: #c4b3ff;
     --bd: 3px solid #fbf6e9;
     --bd-fat: 5px solid #fbf6e9;
@@ -117,7 +116,7 @@
     color-scheme: light;
     --cream: #fbf6e9; --card: #fffdf5; --inset: #fdf3d6;
     --ink: #0a0a0a; --ink-2: #1a1a1a; --muted: #4a4a4a;
-    --yellow: #ffcf24; --yellow-2: #ffda52;
+    --lime: #cdff71; --lime-2: #dcff97;
     --coral: #ff5a5a; --lav: #b8a4ff;
     --bd: 3px solid #0a0a0a;
     --bd-fat: 5px solid #0a0a0a;
@@ -128,6 +127,7 @@
   }
 
   /* ── base ─────────────────────────────────────────────────────────── */
+  * { box-sizing: border-box; margin: 0; }
   body {
     overflow-x: clip;
     background: var(--cream);
@@ -147,6 +147,7 @@
     letter-spacing: -.035em; line-height: .95; text-wrap: balance;
     text-transform: uppercase;
   }
+  h2.sec { font-size: var(--s-2); max-width: 26ch; margin-bottom: 1.6rem; }
   a { color: inherit; }
   :focus-visible { outline: 4px solid var(--coral); outline-offset: 3px; }
 
@@ -160,7 +161,7 @@
   /* ── header ───────────────────────────────────────────────────────── */
   header {
     position: sticky; top: 0; z-index: 30;
-    background: var(--yellow); border-bottom: var(--bd-fat);
+    background: var(--lime); border-bottom: var(--bd-fat);
   }
   .bar { display: flex; align-items: center; gap: 1rem; padding-block: .7rem; }
   .brand {
@@ -196,7 +197,7 @@
 
   h1 { font-size: clamp(2.4rem, 1.6rem + 3.2vw, 4.4rem); margin-bottom: 1.4rem; }
   h1 mark {
-    background: var(--yellow); color: #0a0a0a;
+    background: var(--lime); color: #0a0a0a;
     border: var(--bd); box-shadow: var(--shadow-s);
     padding: 0 .12em; display: inline-block;
     transform: rotate(-1.4deg);
@@ -216,7 +217,7 @@
   }
   .btn:hover { transform: translate(-2px, -2px); box-shadow: var(--shadow-l); }
   .btn:active { transform: translate(8px, 8px); box-shadow: none; }
-  .btn-y { background: var(--yellow); color: #0a0a0a; }
+  .btn-y { background: var(--lime); color: #0a0a0a; }
   .shell {
     margin-top: 1.6rem; font-family: var(--mono); font-size: var(--s--1);
     background: var(--ink); color: var(--cream);
@@ -249,7 +250,7 @@
   .ln p { margin: 0; }
 
   .appr {
-    border: var(--bd); background: var(--yellow);
+    border: var(--bd); background: var(--lime);
     box-shadow: var(--shadow-s); padding: .85rem; margin-top: .4rem;
   }
   .appr-h {
@@ -301,30 +302,28 @@
   }
 
   /* ── generic block ────────────────────────────────────────────────── */
-  .blk {
-    border: var(--bd); background: var(--card);
-    box-shadow: var(--shadow); padding: clamp(1.3rem, 3vw, 2rem);
-  }
   .rule { height: 5px; background: var(--ink); margin-block: 0; }
 
   .problem p { font-size: var(--s-1); max-width: 62ch; }
   .problem p + p { margin-top: 1rem; }
-  .problem b { background: var(--yellow); border: 2px solid var(--ink); padding: 0 .2em; color: #0a0a0a; }
+  .problem b { background: var(--lime); border: 2px solid var(--ink); padding: 0 .2em; color: #0a0a0a; }
 
-  /* ── demo GIF (sản phẩm thật, không phải minh hoạ) ─────────────────── */
+  /* ── screenshots (real UI, scripted AI) ───────────────────────────── */
   .demo { padding-top: 0; }
   .demo-frame { margin: 0; }
+  .demo-frame + .demo-frame { margin-top: 3.5rem; }
   .demo-frame img {
-    display: block; width: 100%; max-width: 900px; height: auto;
+    display: block; width: 100%; max-width: 1000px; height: auto;
     border: var(--bd-fat); box-shadow: var(--shadow-l);
   }
   .demo-frame figcaption {
-    max-width: 62ch; margin-top: 1.6rem;
+    max-width: 66ch; margin-top: 1.6rem;
     font-family: var(--mono); font-size: var(--s--1); line-height: 1.7;
     border-left: var(--bd-fat); padding-left: 1rem;
   }
+  .demo-frame figcaption b { font-weight: 800; }
 
-  /* ── modes table ──────────────────────────────────────────────────── */
+  /* ── tables (modes, roles) ────────────────────────────────────────── */
   .scroll { overflow-x: auto; min-width: 0; max-width: 100%; margin-top: 1.8rem; border: var(--bd); box-shadow: var(--shadow); }
   table { border-collapse: collapse; width: 100%; min-width: 760px; font-size: var(--s--1); background: var(--card); }
   th, td {
@@ -338,6 +337,7 @@
   }
   td:first-child { font-family: var(--mono); font-weight: 800; text-transform: uppercase; white-space: nowrap; }
   td code { font-family: var(--mono); background: var(--inset); border: 2px solid var(--ink); padding: 0 .3em; }
+  tr.switch td { background: var(--inset); }
   /* Dải màu ngữ nghĩa: cho phép (lavender) vs cấm (coral) — đọc được ở cả 2 theme. */
   .can, .cant { position: relative; padding-left: 1.6rem; }
   .can::before, .cant::before {
@@ -346,6 +346,8 @@
   }
   .can::before  { background: var(--lav); }
   .cant::before { background: var(--coral); }
+  .note { margin-top: 1.4rem; max-width: 70ch; font-size: var(--s--1); }
+  .note + .note { margin-top: .8rem; }
 
   /* ── features ─────────────────────────────────────────────────────── */
   .fgrid {
@@ -353,27 +355,23 @@
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
   }
   .f { border: var(--bd); background: var(--card); box-shadow: var(--shadow); padding: 1.4rem; }
-  .f:nth-child(3n+1) { background: var(--card); }
   .f:nth-child(3n+2) { background: var(--inset); }
   .f .lbl {
     display: inline-block; font-family: var(--mono); font-weight: 800; font-size: .68rem;
     letter-spacing: .12em; text-transform: uppercase;
-    background: var(--yellow); color: #0a0a0a; border: 2px solid #0a0a0a;
+    background: var(--lime); color: #0a0a0a; border: 2px solid #0a0a0a;
     padding: .15rem .45rem; margin-bottom: .9rem;
   }
   .f h3 { font-size: var(--s-1); margin-bottom: .6rem; }
   .f p { margin: 0; font-size: var(--s--1); line-height: 1.7; }
   .f code { font-family: var(--mono); background: var(--cream); border: 2px solid var(--ink); padding: 0 .25em; }
 
-  /* ── contribute ───────────────────────────────────────────────────── */
-  .contrib { background: var(--yellow); border: var(--bd-fat); box-shadow: var(--shadow-l); padding: clamp(1.5rem, 4vw, 3rem); color: #0a0a0a; }
+  /* ── contact ──────────────────────────────────────────────────────── */
+  .contrib { background: var(--lime); border: var(--bd-fat); box-shadow: var(--shadow-l); padding: clamp(1.5rem, 4vw, 3rem); color: #0a0a0a; }
+  .contrib .tag { background: #0a0a0a; color: #fbf6e9; }
   .contrib h2 { font-size: var(--s-3); max-width: 18ch; }
   .contrib .lede { border-left-color: #0a0a0a; max-width: 60ch; margin-top: 1.2rem; }
-  .asks { display: grid; gap: 1.2rem; margin-top: 2rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); }
-  .ask { background: #fffdf5; border: 3px solid #0a0a0a; box-shadow: 5px 5px 0 0 #0a0a0a; padding: 1.1rem; }
-  .ask b { display: block; font-family: var(--sans); font-weight: 900; text-transform: uppercase; font-size: var(--s-1); margin-bottom: .4rem; letter-spacing: -.02em; }
-  .ask span { font-size: var(--s--1); line-height: 1.65; }
-  .contrib .btn { border-color: #0a0a0a; box-shadow: 8px 8px 0 0 #0a0a0a; }
+  .contrib .btn { border-color: #0a0a0a; box-shadow: 8px 8px 0 0 #0a0a0a; background: #fffdf5; color: #0a0a0a; }
   .contrib .btn:hover { box-shadow: 12px 12px 0 0 #0a0a0a; }
   .contrib .btn:active { box-shadow: none; }
 
@@ -395,8 +393,9 @@
     <nav>
       <a href="#gate" class="hide-sm">Gate</a>
       <a href="#modes" class="hide-sm">Modes</a>
-      <a href="#contribute">Contribute</a>
-      <a href="https://github.com/Bow-T/bow-gid">GitHub</a>
+      <a href="#screens" class="hide-sm">Screens</a>
+      <a href="#roles" class="hide-sm">Roles</a>
+      <a href="#contact">Contact</a>
       <button id="theme" aria-label="Switch colour theme">◐</button>
     </nav>
   </div>
@@ -406,26 +405,26 @@
   <section class="hero wrap">
     <div class="hgrid">
       <div>
-        <span class="tag">Open source · MIT · Claude Agent SDK</span>
+        <span class="tag">Self-hosted · Claude Agent SDK · Your machine</span>
         <h1>An AI agent your team can share, because you hold the <mark>gate</mark>.</h1>
         <p class="lede">
           Point it at a Jira ticket, a spec, or a sentence. It plans first, you approve, then it
           executes — and every write stops for a human before it runs.
         </p>
         <div class="cta">
-          <a class="btn btn-y" href="https://github.com/Bow-T/bow-gid">★ Star on GitHub</a>
-          <a class="btn" href="#contribute">Bring an idea →</a>
+          <a class="btn btn-y" href="#screens">See the real UI ↓</a>
+          <a class="btn" href="#contact">Ask for a walkthrough →</a>
         </div>
-        <div class="shell">$ git clone github.com/Bow-T/bow-gid &amp;&amp; npm run ui</div>
+        <div class="shell">Runs on your machine · Node ≥ 22 · your existing Claude login — no API key</div>
       </div>
 
       <div id="gate">
         <div class="term">
           <div class="tbar">
             <span class="sq" style="background:var(--coral);border-color:var(--coral)"></span>
-            <span class="sq" style="background:var(--yellow);border-color:var(--yellow)"></span>
+            <span class="sq" style="background:var(--lime);border-color:var(--lime)"></span>
             <span class="sq" style="background:var(--lav);border-color:var(--lav)"></span>
-            <span style="margin-left:.4rem">PROJ-412 · execute</span>
+            <span style="margin-left:.4rem">PROJ-412 · manual</span>
             <span class="live"><span class="sq"></span>live</span>
           </div>
           <div class="tbody" id="term" aria-live="polite"></div>
@@ -452,175 +451,242 @@
     </p>
   </section>
 
-  <section class="wrap demo">
-    <span class="tag">Not a mockup — the real thing</span>
-    <h2 style="font-size:var(--s-2);max-width:26ch;margin-bottom:1.6rem">
-      The agent found the bug and wrote the patch. Then it stopped.
-    </h2>
+  <section class="wrap demo" id="real">
+    <span class="tag">Not a mockup — the real UI</span>
+    <h2 class="sec">The agent found the bug and wrote the patch. Then it stopped.</h2>
     <figure class="demo-frame">
-      <img src="media/demo-approval.gif" width="900"
-           alt="Screen recording of the bow-gid web UI: the agent reads the code, finds the empty-cart crash, and writes a patch. An approval card appears showing the exact diff with Allow and Deny buttons. Nothing is written to disk until a human clicks Allow.">
+      <img src="media/ui-approval.png" width="1440" height="900" loading="lazy"
+           alt="The bow-gid desk: a task list on the left, the chat in the middle. The agent says it is guarding the empty cart and that this write waits for you. Below it a lime approval card shows the file path and the new content of src/cart.ts, with Deny (Từ chối), More and Allow (Cho phép) buttons. The top bar reads 1 waiting, project Shop, mode Manual.">
       <figcaption>
-        Real recording. The agent has the fix ready — and it cannot touch the file until a human
-        clicks. Every write works this way. There is no path around it.
-      </figcaption>
-    </figure>
-  </section>
-
-  <section class="wrap demo" id="ui">
-    <span class="tag">The web UI</span>
-    <h2 style="font-size:var(--s-2);max-width:26ch;margin-bottom:1.6rem">
-      One agent core. A tab for every session.
-    </h2>
-    <figure class="demo-frame">
-      <img src="media/ui-workspace.png" width="900"
-           alt="The bow-gid workspace: a left nav of app screens, a tab bar of parallel agent sessions, the task composer, and a right rail with agent activity, the approval queue and recent tasks.">
-      <figcaption>
-        Left nav for the app screens · a tab bar where every tab is its own agent session, with its
-        own model, account, repo and mode · a right rail with live agent activity, the approval
-        queue and recent tasks. Two tabs can run different models against different repos at once —
-        and you can talk over a running turn instead of waiting for it to end.
+        The write card shows the exact file and content. <b>Deny</b>, <b>Allow</b>, or <b>More</b> —
+        allow this exact action from now on, or edit the content before it lands. The tab list
+        marks the task “1 waiting”, and the card can follow you to your phone. Every write works this
+        way; there is no path around it.
       </figcaption>
     </figure>
   </section>
 
   <section class="modes wrap" id="modes">
-    <span class="tag">One agent, every role</span>
-    <h2 style="font-size:var(--s-2);max-width:24ch">Same core. Same gate. Six different amounts of rope.</h2>
+    <span class="tag">How much rope</span>
+    <h2 class="sec">Four modes and two switches. One list of brakes that never lifts.</h2>
     <div class="scroll">
       <table>
         <thead>
-          <tr><th>Role</th><th>Command</th><th>Can do</th><th>Cannot do</th></tr>
+          <tr><th>Per tab</th><th>Runs on its own</th><th>Still stops for you</th></tr>
         </thead>
         <tbody>
           <tr>
-            <td>Dev</td><td><code>npm run ui</code></td>
-            <td class="can">Everything — with an approval card for every write</td>
-            <td class="cant">—</td>
+            <td>Plan</td>
+            <td class="can">Reads, search, safe shell — then a written plan</td>
+            <td class="cant">Every write. Plan mode only plans.</td>
           </tr>
           <tr>
-            <td>QC</td><td><code>npm run ui:share</code></td>
-            <td class="can">Read source, triage Jira tickets, comment &amp; transition issues</td>
-            <td class="cant">Touch a single line of code</td>
+            <td>Manual</td>
+            <td class="can">Reads, plus safe test / build / type-check commands</td>
+            <td class="cant">Every edit and every command with side effects</td>
           </tr>
           <tr>
-            <td>Collab</td><td><code>npm run ui:share</code></td>
-            <td class="can">Write code, run tests</td>
-            <td class="cant">Write <em>anything</em> — including git — without your live approval</td>
+            <td>Edit-auto</td>
+            <td class="can">File edits inside the repo</td>
+            <td class="cant">Shell with side effects, anything outside the repo</td>
           </tr>
           <tr>
-            <td>BA</td><td><code>npm run ui:share</code></td>
-            <td class="can">Write docs and <code>*.md</code>, full Jira access</td>
-            <td class="cant">Source, database, deploy — hard-denied</td>
+            <td>Auto</td>
+            <td class="can">Edits plus non-destructive shell</td>
+            <td class="cant">Risky actions — <code>rm -rf</code>, <code>git push</code>, writes outside the repo</td>
           </tr>
-          <tr>
-            <td>Reviewer</td><td><code>npm run ui:share</code></td>
-            <td class="can">Review PRs, comment and approve on GitHub, run tests</td>
-            <td class="cant">Edit code, merge, push</td>
+          <tr class="switch">
+            <td>Auto-approve</td>
+            <td class="can">Anything you could undo — and it carries the task through commit → push the work branch → open the merge request</td>
+            <td class="cant">Choosing between approaches: it asks you</td>
           </tr>
-          <tr>
-            <td>DevOps</td><td><code>npm run ui:share</code></td>
-            <td class="can">Write infra — Dockerfile, compose, workflows, Terraform, k8s</td>
-            <td class="cant">Touch app source; deploy needs your approval</td>
+          <tr class="switch">
+            <td>Autopilot</td>
+            <td class="can">Picks the approach itself and re-checks every acceptance clause before it opens the MR — under a per-turn cost cap</td>
+            <td class="cant">The hard brakes below</td>
           </tr>
         </tbody>
       </table>
     </div>
-    <p style="margin-top:1.4rem;max-width:70ch;font-size:var(--s--1)">
-      Every role is served from one shared port: you approve each LAN user and grant them a
-      role &amp; project, and they all open the same address. Admin is the machine at the real
-      socket address — a LAN client cannot forge a header to seize it.
+    <p class="note">
+      <b>Hard brakes, in every mode:</b> deleting files that existed before the turn, discarding uncommitted
+      work (<code>reset --hard</code>, <code>clean</code>), force-push, anything on the main branch, merging or
+      closing a merge request, writing to a database, <code>sudo</code>. The agent opens merge requests; merging
+      is a human's job.
     </p>
   </section>
 
-  <section class="wrap">
-    <span class="tag">What you get</span>
+  <section class="wrap demo" id="screens">
+    <span class="tag">Watch it work</span>
+    <h2 class="sec">One agent core. A tab for every session.</h2>
+    <figure class="demo-frame">
+      <img src="media/ui-live.png" width="1440" height="900" loading="lazy"
+           alt="The Live view of a finished turn: a stage strip Plan, Code, Test, Review, Ship; a work board with three done tasks and their estimates; the request and the agent's summary around an orb; a steps strip counting read, edit, run, delegate and plan; and a files-changed panel listing src/cart.ts with six added lines.">
+      <figcaption>
+        Every tab is its own agent session — its own project, model and mode, and one click gives a
+        ticket its own git worktree — so two tabs can run different models on different repos at once. The <b>Live</b> view turns a turn
+        into a work board (the agent's own task list, with its estimates), the files it changed and
+        every step it took. Type while it works and it picks your words up at the next tool call.
+      </figcaption>
+    </figure>
+    <figure class="demo-frame">
+      <img src="media/ui-map.png" width="1440" height="900" loading="lazy"
+           alt="The Map screen: a knowledge graph of the project — clusters of memory notes, skills, docs, MCP servers, tools and code around the agent, with the current task linked to the tools and the file it touched.">
+      <figcaption>
+        <b>Map</b> is the knowledge graph of the project: every memory note, skill, doc and MCP server,
+        with an edge only where the text really links. When a tab works, each tool call pulses the
+        thing it touched — the note it read, the skill it loaded, the file it edited.
+      </figcaption>
+    </figure>
+  </section>
+
+  <section class="wrap" id="features">
+    <span class="tag">What else is in the box</span>
     <div class="fgrid">
       <div class="f">
-        <span class="lbl">One gate</span>
-        <h3>No path around it</h3>
-        <p>Reads run free. Every write — edits, side-effecting shell, Jira comments, SQL — routes
-          through a single function, <code>canUseTool</code>. Auditing this project means reading
-          one file.</p>
-      </div>
-      <div class="f">
-        <span class="lbl">Remote approval</span>
-        <h3>Their agent, your keyboard</h3>
-        <p>A contractor’s agent wants to write? The approval card pops up on <em>your</em> screen,
-          with the diff, and waits. Nothing lands on disk until you click.</p>
-      </div>
-      <div class="f">
-        <span class="lbl">Ticket → plan</span>
+        <span class="lbl">Ticket → MR</span>
         <h3>Paste a Jira URL</h3>
-        <p>It pulls the ticket, the acceptance criteria, the screenshots — and the video
-          attachments, which it watches. Then it plans, and touches nothing until you approve.</p>
+        <p>It pulls the ticket, acceptance criteria, screenshots and video attachments, splits the
+          ticket into clauses, and reports each one as done, unverified or missing — with a hand-off
+          note for QC.</p>
       </div>
       <div class="f">
-        <span class="lbl">Your repo</span>
-        <h3>Not a generic codebase</h3>
-        <p>Point it anywhere with <code>--cwd</code>. It reads that repo’s <code>CLAUDE.md</code>,
-          detects the stack, and can write a lasting knowledge profile for a codebase it has never
-          seen.</p>
+        <span class="lbl">Queue</span>
+        <h3>Tickets, one after another</h3>
+        <p>Queue a sprint's tickets and walk away; each runs unattended in its own worktree through to
+          a merge request. Sprint-scan triages on a schedule and asks the reporter when a ticket is
+          unclear; one click checks the whole sprint for duplicate tickets.</p>
       </div>
       <div class="f">
-        <span class="lbl">Subagents</span>
-        <h3>A reviewer that argues back</h3>
-        <p>Opt in and the main agent delegates: a reviewer that attacks the plan, a verifier that
-          traces runtime behaviour, a scout that finds every call site before you change a contract.
-          All read-only.</p>
+        <span class="lbl">Agent crew</span>
+        <h3>Reviewers that argue back</h3>
+        <p>A reviewer attacks the plan, a verifier traces runtime behaviour, a challenger writes
+          adversarial tests, a scout finds every call site. All read-only — and with the crew on,
+          no commit goes through until the latest diff has been reviewed.</p>
       </div>
       <div class="f">
-        <span class="lbl">Self-hosted</span>
-        <h3>Runs on your machine</h3>
-        <p>Your code never leaves your network. Uses your existing Claude subscription through the
-          CLI — no API key, no separate bill, no third-party server in the middle.</p>
+        <span class="lbl">Test</span>
+        <h3>On a simulator or in a browser</h3>
+        <p>A test turn drives your iOS Simulator or a web page like a QA engineer would, records the
+          video, and saves a script you can replay. Taps on risky buttons still stop for approval.</p>
+      </div>
+      <div class="f">
+        <span class="lbl">Group chat</span>
+        <h3>Bow Agent in the room</h3>
+        <p>Team rooms plus a private “Ask Bow”. It reads committed code and queries your database
+          read-only — secrets blocked, results masked — and drafts Jira tickets that go out only
+          after someone approves the card.</p>
+      </div>
+      <div class="f">
+        <span class="lbl">Desktop app</span>
+        <h3>Their tools stay on their machine</h3>
+        <p>Teammates join your Host from the bow-gid app. Their own connectors — Notion, Linear,
+          Jira, Figma, Miro — sign in on their machine, and the token never leaves it. The Host sees
+          each call the agent makes through them, and logs it.</p>
+      </div>
+      <div class="f">
+        <span class="lbl">Phone</span>
+        <h3>The card follows you</h3>
+        <p>A card left waiting (20 s by default) or a long run finishing pings your phone through the
+          companion app and your own Firebase project. On Android, with phone approval switched on,
+          routine cards can be answered from the notification; risky ones open the app behind your
+          fingerprint. The push names only the event and the task; what the agent wants to run
+          travels encrypted.</p>
+      </div>
+      <div class="f">
+        <span class="lbl">Daily</span>
+        <h3>Today, Release, Design</h3>
+        <p><b>Today</b> plans your day from Jira due dates and estimates. <b>Release</b> runs your
+          project's own release script with the flags you pick. <b>Designs</b> keeps UI drafts in the
+          repo, next to the code.</p>
+      </div>
+      <div class="f">
+        <span class="lbl">Models</span>
+        <h3>Pick per tab</h3>
+        <p>Claude through your existing subscription, or another model through a gateway — chosen per
+          tab. Long sessions compact themselves instead of dying, and a hit usage cap schedules a
+          resume.</p>
       </div>
     </div>
   </section>
 
-  <section class="wrap" id="contribute">
+  <section class="roles wrap" id="roles">
+    <span class="tag">One agent, every role</span>
+    <h2 class="sec">Same core. Same gate. Different amounts of reach.</h2>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr><th>Seat</th><th>For</th><th>Can do</th><th>Cannot do</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Admin</td><td>You, on the machine</td>
+            <td class="can">Everything — every write goes through the gate, at the mode you pick</td>
+            <td class="cant">Only the hard brakes</td>
+          </tr>
+          <tr>
+            <td>QC</td><td>QA engineers</td>
+            <td class="can">Ask about the code, read Jira, triage tickets — writing Jira with their own Jira login</td>
+            <td class="cant">Edit a file or run a command</td>
+          </tr>
+          <tr>
+            <td>Collab</td><td>Contractors</td>
+            <td class="can">Code like a dev, run tests</td>
+            <td class="cant">Write <em>anything</em> — files, commands, git, MCP — without your live approval</td>
+          </tr>
+          <tr>
+            <td>BA</td><td>Business analysts</td>
+            <td class="can">Write docs and <code>*.md</code>, read Jira, write Jira with their own Jira login</td>
+            <td class="cant">Source edits, deploys — hard-denied</td>
+          </tr>
+          <tr>
+            <td>Reviewer</td><td>Tech leads</td>
+            <td class="can">Review PRs, comment and approve on GitHub, run tests</td>
+            <td class="cant">Edit code, write Jira, merge</td>
+          </tr>
+          <tr>
+            <td>DevOps</td><td>Platform engineers</td>
+            <td class="can">Edit Dockerfile, CI, Terraform, k8s and deploy — every write waits for you</td>
+            <td class="cant">Touch application source</td>
+          </tr>
+          <tr>
+            <td>Guest</td><td>People outside the team</td>
+            <td class="can">The group chats they were added to — message, file a bug or story, ask Bow about Jira</td>
+            <td class="cant">Run the agent; Bow won't read code or query the database for them</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">
+      Everyone opens one shared address over HTTPS (bow makes its own local CA). People ask to join by
+      name; you approve them and grant role · project pairs, and screens they cannot use are hidden.
+      Admin is the machine at the real socket address — a LAN client cannot forge a header to seize it.
+    </p>
+  </section>
+
+  <section class="wrap" id="contact">
     <div class="contrib">
-      <span class="tag">Contribute</span>
-      <h2>Ideas count as contributions.</h2>
+      <span class="tag">Get in touch</span>
+      <h2>Want it for your team?</h2>
       <p class="lede">
-        This started as an internal tool and went open because the problem turned out not to be
-        internal at all. If you have fought “how do I let my team use an AI agent without giving them
-        root” — I want to hear how you solved it. <b style="background:#fffdf5;border:2px solid #0a0a0a;padding:0 .2em">No code required.</b>
+        bow-gid runs on your own machine and uses your own Claude login — there is no bow-gid server
+        in the middle and nothing to sign up for. It is in private use today. If you are working out how to let a whole team use an
+        AI agent without giving anyone root, ask for a walkthrough.
       </p>
-
-      <div class="asks">
-        <div class="ask">
-          <b>More roles</b>
-          <span>There are six. What about a designer? A PM? A security reviewer? Each is a permission
-          policy — the hard part is deciding what the role should never touch.</span>
-        </div>
-        <div class="ask">
-          <b>More stacks</b>
-          <span>The base profile assumes Flutter + Supabase because that is what I build. Rails,
-          Django, Go, Next.js — drop in one markdown file and it works for people like you.</span>
-        </div>
-        <div class="ask">
-          <b>Auth beyond LAN</b>
-          <span>Sharing means “same network, admin approves you by name.” Real auth would let teams
-          use this remotely.</span>
-        </div>
-      </div>
-
       <div class="cta" style="margin-top:2.4rem">
-        <a class="btn" href="https://github.com/Bow-T/bow-gid/discussions">💡 Start a discussion</a>
-        <a class="btn" href="https://github.com/Bow-T/bow-gid/issues/new?template=idea.yml">Open an idea issue</a>
-        <a class="btn" href="https://github.com/Bow-T/bow-gid/blob/main/CONTRIBUTING.md">Read CONTRIBUTING</a>
+        <a class="btn" href="https://github.com/Bow-T/bow-gid-site/issues/new?title=Walkthrough%20request">Ask for a walkthrough →</a>
+        <a class="btn" href="https://github.com/Bow-T/bow-gid-site/issues/new">Ask a question</a>
       </div>
     </div>
   </section>
 </main>
 
 <footer class="wrap">
-  <span>MIT © Bow-T</span>
+  <span>© Bow-T</span>
   <nav>
-    <a href="https://github.com/Bow-T/bow-gid">GitHub</a>
-    <a href="https://github.com/Bow-T/bow-gid/blob/main/ARCHITECTURE.md">Architecture</a>
-    <a href="https://github.com/Bow-T/bow-gid/blob/main/README.vi.md">Tiếng Việt</a>
+    <a href="#gate">Gate</a>
+    <a href="#modes">Modes</a>
+    <a href="#roles">Roles</a>
     <a href="https://www.npmjs.com/package/@anthropic-ai/claude-agent-sdk">Claude Agent SDK</a>
   </nav>
 </footer>
@@ -643,15 +709,13 @@
 
   const SCRIPT = [
     { sig: 'YOU', who: 'you', text: 'PROJ-412 — checkout crashes when the cart is empty' },
-    { sig: '···', who: 'bot', text: 'Read Jira PROJ-412, 2 screenshots. Found it: cart.items[0] with no guard.' },
-    { sig: '···', who: 'bot', text: 'Plan: guard the empty case, render the empty-cart state, add a regression test.' },
-    { sig: '···', who: 'bot', text: 'Approved. Executing — 1 file to write.' },
+    { sig: '···', who: 'bot', text: 'Read Jira PROJ-412, 2 screenshots. Found it: items[0] read with no guard.' },
+    { sig: '···', who: 'bot', text: 'Plan: return 0 for an empty cart, add a regression test. Writing the fix.' },
   ];
 
-  const DIFF = `<div class="path">apps/checkout/cart_page.dart</div>
-<div class="del">-  final first = cart.items[0];</div>
-<div class="add">+  if (cart.isEmpty) return EmptyCart();</div>
-<div class="add">+  final first = cart.items.first;</div>`;
+  const DIFF = `<div class="path">src/cart.ts</div>
+<div class="del">-  const first = items[0];</div>
+<div class="add">+  if (items.length === 0) return 0;</div>`;
 
   const wait = ms => new Promise(r => setTimeout(r, reduced ? 0 : ms));
 
@@ -698,14 +762,14 @@
     const out = document.createElement('div');
     out.className = 'out ' + (ok ? 'ok' : 'no');
     out.textContent = ok
-      ? 'ALLOWED — wrote cart_page.dart · test passed · nothing else touched.'
+      ? 'ALLOWED — wrote src/cart.ts · test passed · nothing else touched.'
       : 'DENIED — nothing was written. Not one byte.';
     term.appendChild(out);
 
     if (!ok) {
       await wait(500);
       await type(addLine({ sig: '···', who: 'bot' }),
-        'Understood — should I show the empty state upstream in CartController instead?');
+        'Understood — should I show an empty-cart state upstream in the checkout page instead?');
     }
 
     await wait(300);

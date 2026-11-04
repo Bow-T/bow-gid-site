@@ -219,13 +219,91 @@
     #theme { margin-left: .35rem; }
   }
 
-  /* ── hero ─────────────────────────────────────────────────────────── */
-  .hero { padding-top: clamp(3rem, 6vw, 5.5rem); }
+  /* ── hero = bow-gid World (three.js, docs/world.src.js → docs/world.js) ── */
+  .hero { padding: 0; }
+  .world {
+    position: relative; overflow: hidden;
+    height: calc(100svh - 58px); min-height: 620px;
+    border-bottom: var(--bd);
+  }
+  .world canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .hero-card {
+    position: absolute; z-index: 2; top: 50%; transform: translateY(-50%);
+    left: max(1.25rem, (100% - 1140px) / 2);
+    width: min(560px, 100% - 2.5rem);
+    background: color-mix(in srgb, var(--card) 94%, transparent);
+    border: var(--bd-fat); border-radius: 16px; box-shadow: var(--shadow-l);
+    padding: clamp(1.4rem, 3vw, 2.4rem);
+  }
+  .hero-card .lede { font-size: var(--s-0); }
+  .hero-card .cta { margin-top: 1.6rem; }
+  .hero-card .facts { margin-top: 1.4rem; }
+  .world-note { margin-top: 1rem; font-family: var(--mono); font-size: .72rem; color: var(--muted); }
+  /* Nút vào thế giới chỉ hiện khi world.js đã dựng xong cảnh (thiếu file / không WebGL / trình duyệt cũ = không có nút chết). */
+  .hero-card .enter, .hero-card .world-note { display: none; }
+  html.has-world .hero-card .enter { display: inline-flex; }
+  html.has-world .hero-card .world-note { display: block; }
+  @media (max-width: 720px) {
+    .world { min-height: 680px; }
+    .hero-card { top: auto; bottom: 1rem; transform: none; }
+    .hero-card .facts { display: none; }
+  }
+
+  /* Trong thế giới: khung 3D phủ cả màn, trang bên dưới đứng yên. */
+  html.in-world, html.in-world body { overflow: hidden; }
+  html.in-world .world { position: fixed; inset: 0; z-index: 60; height: 100svh; min-height: 0; border: 0; }
+  html.in-world .world canvas { touch-action: none; cursor: pointer; }
+  html.in-world .hero-card { display: none; }
+  .hud, .wpanel, .wfinal { display: none; }
+  html.in-world .hud { display: flex; }
+  .hud {
+    position: absolute; z-index: 3; inset: 1rem 1rem auto; align-items: center; gap: .75rem;
+    pointer-events: none;
+  }
+  .hud > * { pointer-events: auto; }
+  .chip {
+    display: inline-flex; align-items: center; gap: .55rem;
+    background: var(--card); color: var(--ink); border: var(--bd); border-radius: 999px;
+    box-shadow: var(--shadow-s); padding: .4rem .9rem;
+    font-family: var(--mono); font-weight: 700; font-size: .76rem;
+  }
+  .stops { display: inline-flex; gap: .3rem; }
+  .stops i { width: .62rem; height: .62rem; border: 2px solid var(--ink); border-radius: 3px; background: var(--card); }
+  .stops i.on { background: var(--lime); }
+  .hud .exit { margin-left: auto; cursor: pointer; }
+  .whint {
+    position: absolute; z-index: 3; left: 50%; bottom: 1.1rem; transform: translateX(-50%);
+    white-space: nowrap; pointer-events: none;
+  }
+  .next { position: absolute; z-index: 3; right: 1rem; bottom: 1rem; }
+  html.in-world .whint, html.in-world .next { display: inline-flex; }
+  .whint, .next { display: none; }
+  .wpanel.open, .wfinal.open { display: block; }
+  .wpanel, .wfinal {
+    position: absolute; z-index: 4; left: 1rem; bottom: 4.6rem;
+    width: min(440px, 100% - 2rem);
+    background: var(--card); color: var(--ink);
+    border: var(--bd-fat); border-radius: 14px; box-shadow: var(--shadow-l);
+    padding: 1.4rem 1.5rem;
+  }
+  .wpanel h3, .wfinal h3 { font-size: 1.45rem; margin: .1rem 0 .6rem; }
+  .wpanel p, .wfinal p { color: var(--muted); font-size: .97rem; }
+  .wpanel .cta, .wfinal .cta { margin-top: 1.1rem; gap: .6rem; }
+  .wpanel .out { margin-top: .9rem; }
+  .wfinal { left: 50%; top: 50%; bottom: auto; transform: translate(-50%, -50%); width: min(520px, 100% - 2rem); }
+  .btn[disabled] { opacity: .55; cursor: not-allowed; transform: none; box-shadow: var(--shadow-s); }
+  @media (max-width: 720px) {
+    .wpanel { left: .6rem; right: .6rem; width: auto; bottom: 4.2rem; padding: 1.1rem 1.1rem; }
+    .wpanel h3 { font-size: 1.2rem; }
+    .whint { display: none !important; }
+  }
+
+  /* Mục "Try the gate" — demo gõ chữ từng nằm ở hero. */
   .hgrid { display: grid; gap: clamp(2.5rem, 5vw, 4.5rem); grid-template-columns: 1fr; }
-  @media (min-width: 960px) { .hgrid { grid-template-columns: 1.05fr .95fr; align-items: center; } }
+  @media (min-width: 960px) { .hgrid { grid-template-columns: 1fr 1fr; align-items: center; } }
   .hgrid > * { min-width: 0; }
 
-  h1 { font-size: clamp(2.6rem, 1.5rem + 3.8vw, 4.6rem); letter-spacing: -.045em; line-height: 1.02; margin-bottom: 1.5rem; }
+  h1 { font-size: clamp(2.2rem, 1.4rem + 2.6vw, 3.6rem); letter-spacing: -.045em; line-height: 1.02; margin-bottom: 1.2rem; }
   h1 mark {
     background: var(--lime); color: #0a0a0a;
     border: var(--bd); border-radius: 8px; box-shadow: var(--shadow-s);
@@ -318,10 +396,9 @@
     text-align: center;
   }
 
-  /* ── motion: hero rises on load, the rest as it scrolls in ────────── */
+  /* ── motion: blocks rise as they scroll in (the hero card shows at once — WebGL start-up must not hide it) ── */
   @keyframes rise { from { opacity: 0; transform: translateY(24px); } }
   @media (prefers-reduced-motion: no-preference) {
-    .in { animation: rise .6s cubic-bezier(.23, 1, .32, 1) both; animation-delay: calc(var(--n, 0) * 90ms); }
     @supports (animation-timeline: view()) {
       .rv {
         animation-name: rise; animation-fill-mode: both; animation-timing-function: ease-out;
@@ -490,7 +567,6 @@
       <a href="#gate" class="hide-sm">Gate</a>
       <a href="#how" class="hide-sm">How it works</a>
       <a href="#modes" class="hide-sm">Modes</a>
-      <a href="#screens" class="hide-sm">Screens</a>
       <a href="#roles" class="hide-sm">Roles</a>
       <a href="#faq" class="hide-sm">FAQ</a>
       <a href="#contact" class="btn btn-y btn-s">Walkthrough →</a>
@@ -500,27 +576,64 @@
 </header>
 
 <main>
-  <section class="hero wrap">
-    <div class="hgrid">
-      <div>
-        <span class="tag in">Self-hosted · Claude Agent SDK · Your machine</span>
-        <h1 class="in" style="--n:1">An AI agent your team can share, because you hold the <mark>gate</mark>.</h1>
-        <p class="lede in" style="--n:2">
+  <section class="hero" id="top">
+    <div class="world" id="world">
+      <div class="hero-card">
+        <span class="tag">Self-hosted · Claude Agent SDK · Your machine</span>
+        <h1>An AI agent your team can share, because you hold the <mark>gate</mark>.</h1>
+        <p class="lede">
           Point it at a Jira ticket, a spec, or a sentence. It plans first, you approve, then it
           executes — and every write stops for a human before it runs.
         </p>
-        <div class="cta in" style="--n:3">
-          <a class="btn btn-y" href="#screens">See the real UI ↓</a>
-          <a class="btn" href="#contact">Ask for a walkthrough →</a>
+        <div class="cta">
+          <button class="btn btn-y enter" type="button">Enter the world →</button>
+          <a class="btn" href="#real">See the real UI ↓</a>
         </div>
-        <ul class="facts in" style="--n:4">
+        <ul class="facts">
           <li>Runs on your machine</li>
           <li>Node ≥ 22</li>
           <li>Your existing Claude login — no API key</li>
         </ul>
+        <p class="world-note">Walk one ticket through five stops, from Jira to a merge request.</p>
       </div>
 
-      <div id="gate" class="in" style="--n:2">
+      <div class="hud" aria-label="World controls">
+        <span class="chip">bow-gid world <span class="stops" aria-label="Stops visited"></span></span>
+        <button class="chip exit" type="button">Exit ✕</button>
+      </div>
+      <span class="chip whint">WASD / arrows to walk · click the ground to go there</span>
+      <button class="btn btn-y btn-s next" type="button">Next stop →</button>
+      <div class="wpanel" role="dialog" aria-live="polite">
+        <span class="tag"></span>
+        <h3></h3>
+        <p></p>
+        <div class="out" hidden></div>
+        <div class="cta"></div>
+      </div>
+      <div class="wfinal" role="dialog">
+        <span class="tag">The whole loop</span>
+        <h3>You walked one ticket from Jira to a merge request.</h3>
+        <p>Ticket, reads, the gate, its own lane, a merge request waiting for a person — run from your
+          machine, with a human holding the gate.</p>
+        <div class="cta">
+          <a class="btn btn-y" href="#contact" data-leave>Ask for a walkthrough →</a>
+          <button class="btn" type="button" data-leave>Back to the page</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap" id="gate">
+    <div class="hgrid">
+      <div>
+        <span class="tag">Try the gate</span>
+        <h2 class="sec">One card stands between the agent and your repo.</h2>
+        <p class="sub">
+          The agent reads the ticket, finds the bug and writes the patch — then waits. Nothing lands
+          until a human says yes.
+        </p>
+      </div>
+      <div class="rv">
         <div class="term">
           <div class="tbar">
             <span class="sq" style="background:var(--coral);border-color:var(--coral)"></span>
@@ -650,34 +763,6 @@
       closing a merge request, writing to a database, <code>sudo</code>. The agent opens merge requests; merging
       is a human's job.
     </p>
-  </section>
-
-  <section class="wrap demo" id="screens">
-    <span class="tag">Watch it work</span>
-    <h2 class="sec">One agent core. A tab for every session.</h2>
-    <figure class="demo-frame rv">
-      <div class="win">
-        <img src="media/ui-live.png" width="1440" height="900" loading="lazy"
-             alt="The Live view of a finished turn: a stage strip Plan, Code, Test, Review, Ship; a work board with three done tasks and their estimates; the request and the agent's summary around an orb; a steps strip counting read, edit, run, delegate and plan; and a files-changed panel listing src/cart.ts with six added lines.">
-      </div>
-      <figcaption>
-        Every tab is its own agent session — its own project, model and mode, and one click gives a
-        ticket its own git worktree — so two tabs can run different models on different repos at once. The <b>Live</b> view turns a turn
-        into a work board (the agent's own task list, with its estimates), the files it changed and
-        every step it took. Type while it works and it picks your words up at the next tool call.
-      </figcaption>
-    </figure>
-    <figure class="demo-frame rv">
-      <div class="win">
-        <img src="media/ui-map.png" width="1440" height="900" loading="lazy"
-             alt="The Map screen: a knowledge graph of the project — clusters of memory notes, skills, docs, MCP servers, tools and code around the agent, with the current task linked to the tools and the file it touched.">
-      </div>
-      <figcaption>
-        <b>Map</b> is the knowledge graph of the project: every memory note, skill, doc and MCP server,
-        with an edge only where the text really links. When a tab works, each tool call pulses the
-        thing it touched — the note it read, the skill it loaded, the file it edited.
-      </figcaption>
-    </figure>
   </section>
 
   <section class="wrap" id="features">
@@ -882,6 +967,7 @@
   </nav>
 </footer>
 
+<script type="module" src="world.js"></script>
 <script>
   const root = document.documentElement;
   const tbtn = document.getElementById('theme');

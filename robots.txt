@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://bow-t.github.io/bow-gid-site/sitemap.xml

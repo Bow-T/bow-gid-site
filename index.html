@@ -1,7 +1,7 @@
 <!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>bow-gid — a shared AI coding agent with a human approval gate</title>
+<title>BOW-GID — a shared AI coding agent with a human approval gate</title>
 
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
@@ -276,8 +276,9 @@
     white-space: nowrap; pointer-events: none;
   }
   .next { position: absolute; z-index: 3; right: 1rem; bottom: 1rem; }
-  html.in-world .whint, html.in-world .next { display: inline-flex; }
-  .whint, .next { display: none; }
+  .jump { position: absolute; z-index: 3; right: 1rem; bottom: 4.2rem; }
+  html.in-world .whint, html.in-world .next, html.in-world .jump { display: inline-flex; }
+  .whint, .next, .jump, html.in-world .wpanel.open ~ .jump { display: none; }
   .wpanel.open, .wfinal.open { display: block; }
   .wpanel, .wfinal {
     position: absolute; z-index: 4; left: 1rem; bottom: 4.6rem;
@@ -295,7 +296,8 @@
   @media (max-width: 720px) {
     .wpanel { left: .6rem; right: .6rem; width: auto; bottom: 4.2rem; padding: 1.1rem 1.1rem; }
     .wpanel h3 { font-size: 1.2rem; }
-    .whint { display: none !important; }
+    .whint:not(.say) { display: none !important; }
+    .whint { top: 4.2rem; bottom: auto; white-space: normal; text-align: center; width: max-content; max-width: calc(100% - 2rem); }
   }
 
   /* Mục "Try the gate" — demo gõ chữ từng nằm ở hero. */
@@ -562,7 +564,7 @@
 
 <header>
   <div class="wrap bar">
-    <a class="brand" href="./"><span class="mk"></span>bow-gid</a>
+    <a class="brand" href="./"><span class="mk"></span>BOW-GID</a>
     <nav>
       <a href="#gate" class="hide-sm">Gate</a>
       <a href="#how" class="hide-sm">How it works</a>
@@ -598,10 +600,10 @@
       </div>
 
       <div class="hud" aria-label="World controls">
-        <span class="chip">bow-gid world <span class="stops" aria-label="Stops visited"></span></span>
+        <span class="chip">BOW-GID WORLD <span class="stops" aria-label="Stops visited"></span></span>
         <button class="chip exit" type="button">Exit ✕</button>
       </div>
-      <span class="chip whint">WASD / arrows to walk · click the ground to go there</span>
+      <span class="chip whint">WASD / arrows to walk · Space to jump · click the ground to go there</span>
       <button class="btn btn-y btn-s next" type="button">Next stop →</button>
       <div class="wpanel" role="dialog" aria-live="polite">
         <span class="tag"></span>
@@ -610,6 +612,7 @@
         <div class="out" hidden></div>
         <div class="cta"></div>
       </div>
+      <button class="chip jump" type="button" aria-label="Jump">Jump ⤒</button>
       <div class="wfinal" role="dialog">
         <span class="tag">The whole loop</span>
         <h3>You walked one ticket from Jira to a merge request.</h3>
